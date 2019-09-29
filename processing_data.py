@@ -21,6 +21,11 @@ cwd = os.getcwd()
 raw_path = cwd + '/raw_dataset'
 data_path = cwd + '/dataset'
 
+# Check if raw_dataset data is available
+if not os.path.exists(raw_path):
+    parser.error(message='file "raw_dataset" not found in current directory')
+    exit(1)
+
 #If the folder dataset already exists it deletes it 
 dirpath = os.path.join('dataset3', 'dataset')
 if os.path.exists(data_path) and os.path.isdir(data_path):
@@ -61,7 +66,7 @@ for type in data_type.keys():
     nf_upper_bound = data_type[type] * n_nonfire_img // 100
     for i, filename in enumerate(shuffled_fire_img_fn[: f_upper_bound], start=1):
         src = raw_path + '/fire/{}'.format(filename)
-        dst = data_path + '/{}/fire/fire_{}'.format(type, i)
+        dst = data_path + '/{}/fire/fire_{}'.format(type, i) # add .jpg?
         shutil.copyfile(src, dst)
 
     for i, filename in enumerate(shuffled_nonfire_img_fn[: nf_upper_bound], start=1):
