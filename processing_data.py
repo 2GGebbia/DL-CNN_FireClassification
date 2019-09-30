@@ -27,7 +27,6 @@ if not os.path.exists(raw_path):
     exit(1)
 
 #If the folder dataset already exists it deletes it 
-dirpath = os.path.join('dataset3', 'dataset')
 if os.path.exists(data_path) and os.path.isdir(data_path):
     shutil.rmtree(data_path)
 
@@ -66,12 +65,12 @@ for type in data_type.keys():
     nf_upper_bound = data_type[type] * n_nonfire_img // 100
     for i, filename in enumerate(shuffled_fire_img_fn[: f_upper_bound], start=1):
         src = raw_path + '/fire/{}'.format(filename)
-        dst = data_path + '/{}/fire/fire_{}'.format(type, i) # add .jpg?
+        dst = data_path + '/{}/fire/fire_{}.jpg'.format(type, i) 
         shutil.copyfile(src, dst)
 
     for i, filename in enumerate(shuffled_nonfire_img_fn[: nf_upper_bound], start=1):
         src = raw_path + '/{}/{}'.format('nonfire',filename)
-        dst = data_path + '/{}/nonfire/nonfire_{}'.format(type, i)
+        dst = data_path + '/{}/nonfire/nonfire_{}.jpg'.format(type, i)
         shutil.copyfile(src, dst)
 
     del shuffled_fire_img_fn[:f_upper_bound]
