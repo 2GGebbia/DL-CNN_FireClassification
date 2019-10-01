@@ -64,13 +64,17 @@ for type in data_type.keys():
     f_upper_bound = data_type[type] * n_fire_img // 100 
     nf_upper_bound = data_type[type] * n_nonfire_img // 100
     for i, filename in enumerate(shuffled_fire_img_fn[: f_upper_bound], start=1):
+        ext = filename.split('.')[-1]
+  
         src = raw_path + '/fire/{}'.format(filename)
-        dst = data_path + '/{}/fire/fire_{}.jpg'.format(type, i) 
+        dst = data_path + '/{}/fire/fire_{}.{}'.format(type, i, ext) 
         shutil.copyfile(src, dst)
 
     for i, filename in enumerate(shuffled_nonfire_img_fn[: nf_upper_bound], start=1):
+        ext = filename.split('.')[-1]
+        
         src = raw_path + '/{}/{}'.format('nonfire',filename)
-        dst = data_path + '/{}/nonfire/nonfire_{}.jpg'.format(type, i)
+        dst = data_path + '/{}/nonfire/nonfire_{}.{}'.format(type, i, ext)
         shutil.copyfile(src, dst)
 
     del shuffled_fire_img_fn[:f_upper_bound]
