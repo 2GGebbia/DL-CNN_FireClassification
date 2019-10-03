@@ -10,15 +10,15 @@ train_datagen = ImageDataGenerator(
         horizontal_flip=True)
 
 train_generator = train_datagen.flow_from_directory(
-        directory = '../dataset/train',
+        directory = 'dataset/train',
         target_size=(250, 250),
         color_mode='rgb',
         shuffle='True',
         batch_size=32,
         class_mode='categorical')
 
-validation_generator = train_datagen.flow_from_directory(
-        directory='../dataset/validation',
+valid_generator = train_datagen.flow_from_directory(
+        directory='dataset/valid',
         target_size=(250, 250),
         color_mode='rgb',
         shuffle='True',
@@ -60,7 +60,7 @@ model.fit_generator(
         train_generator,
         steps_per_epoch=STEP_SIZE_TRAIN,
         epochs=10,
-        validation_data=validation_generator,
+        validation_data=valid_generator,
         validation_steps=STEP_SIZE_VALID,
         verbose=1)
 
