@@ -15,7 +15,7 @@ train_generator = train_datagen.flow_from_directory(
         color_mode='rgb',
         shuffle='True',
         batch_size=32,
-        class_mode='binary')
+        class_mode='categorical')
 
 validation_generator = train_datagen.flow_from_directory(
         directory='../dataset/validation',
@@ -23,35 +23,46 @@ validation_generator = train_datagen.flow_from_directory(
         color_mode='rgb',
         shuffle='True',
         batch_size=32,
-        class_mode='binary')
+        class_mode='categorical')
 
 
 # #Define the NN architecture
 from keras.models import Sequential
-from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Flatten
-#Two hidden layers
+from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Flatten, BatchNormalization, Dropout
+
 model = Sequential()
-model.add(Conv2D(64, 3, 3, activation='relu', input_shape=train_generator.image_shape))
+model.add(Conv2D(64, 5, 5, activation='relu', input_shape=train_generator.image_shape))
+model.add(MaxPooling2D(pool_size=(3, 3)))
+# model.add(BatchNormalization())
+
+
+model.add(Conv2D(128, 3, 3, activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(16, 3, 3, activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+# model.add(BatchNormalization())
+
+model.add(Dense(2048, activation='tanh'))
+
+model.add(Dropout(0.5))
 model.add(Flatten())
-model.add(Dense(40, activation='relu'))
+
 model.add(Dense(2, activation=('softmax')))
 
-from keras.utils import plot_model
-plot_model(model, to_file='model.json', show_shapes=True)
+#from keras.utils import plot_model
+#plot_model(model, to_file='model.json', show_shapes=True)
 
 # #Compile the NN
-model.compile(optimizer='sgd',loss='binary_crossentropy',metrics=['accuracy'])
+model.compile(optimizer='sgd',loss='categorical_crossentropy',metrics=['accuracy'])
 
+STEP_SIZE_TRAIN=train_generator.n//train_generator.batch_size
+STEP_SIZE_VALID=valid_generator.n//valid_generator.batch_size
 # #Start training
 model.fit_generator(
         train_generator,
-        steps_per_epoch=2000,
+        steps_per_epoch=STEP_SIZE_TRAIN,
         epochs=10,
         validation_data=validation_generator,
-        validation_steps=800)
+        validation_steps=STEP_SIZE_VALID,
+        verbose=1)
 
 
 # ##Store Plots
