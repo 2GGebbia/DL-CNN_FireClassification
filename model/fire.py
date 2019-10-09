@@ -1,8 +1,11 @@
-#from __future__ import division
-
+from __future__ import division
+import keras
 import tensorflow as tf
 print( 'Using Keras version', keras.__version__)
 from keras.preprocessing.image import ImageDataGenerator
+from keras.regularizers import l1, l1_l2, l2
+
+from model import first_arch 
 import getpass
 
 dataset_dir = '/home/nct01/{}/.keras/datasets/dataset'.format(getpass.getuser())
@@ -31,27 +34,52 @@ valid_generator = train_datagen.flow_from_directory(
         batch_size=32,
         class_mode='categorical')
 
+image_shape = train_generator.image_shape
 
-# #Define the NN architecture
-from keras.models import Sequential
-from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Flatten, BatchNormalization, Dropout
+kwargs = {
+    "first_layer":
+        {
+            "filters": 64,
+            "kernel_size": (5,5),
+            "activation": 'relu',
+            "kernel_regularizer": l2(0.)
+        },
+    "second_layer":
+        {
+            "filters": 128,
+            "kernel_size": (5,5),
+            "activation": 'relu',
+            "kernel_regularizer": l2(0.)
+        },
+    "dense_layer":
+        {
+            "units": 2048,
+            "activation": 'tanh'
+            # "kernel_regularizer":l2
+        },
+    "dropout": 0.5
+}
+model = first_arch(input_shape=image_shape, normalization=False,**kwargs)
+# # #Define the NN architecture
+# from keras.models import Sequential
+# from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Flatten, BatchNormalization, Dropout
 
-model = Sequential()
-model.add(Conv2D(64, 5, 5, activation='relu', input_shape=train_generator.image_shape))
-model.add(MaxPooling2D(pool_size=(3, 3)))
-# model.add(BatchNormalization())
+# model = Sequential()
+# model.add(Conv2D(64, 5, 5, activation='relu', input_shape=image_shape))
+# model.add(MaxPooling2D(pool_size=(3, 3)))
+# # model.add(BatchNormalization())
 
 
-model.add(Conv2D(128, 3, 3, activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-# model.add(BatchNormalization())
+# model.add(Conv2D(128, 3, 3, activation='relu'))
+# model.add(MaxPooling2D(pool_size=(2, 2)))
+# # model.add(BatchNormalization())
 
-model.add(Dense(2048, activation='tanh'))
+# model.add(Dense(2048, activation='tanh'))
 
-model.add(Dropout(0.5))
-model.add(Flatten())
+# model.add(Dropout(0.5))
+# model.add(Flatten())
 
-model.add(Dense(2, activation=('softmax')))
+# model.add(Dense(2, activation=('softmax')))
 
 #from keras.utils import plot_model
 #plot_model(model, to_file='model.json', show_shapes=True)
