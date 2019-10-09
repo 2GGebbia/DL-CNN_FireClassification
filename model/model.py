@@ -18,7 +18,7 @@ def first_arch(input_shape, normalization=True, **kwargs):
     if normalization: model.add(BatchNormalization())
 
     dense_layer_dict = kwargs['dense_layer']
-    model.add(Dense(2048, activation='tanh'))
+    model.add(Dense(**dense_layer_dict))
     model.add(Dropout(0.5))
 
     model.add(Flatten())
