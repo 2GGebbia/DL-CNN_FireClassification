@@ -1,4 +1,3 @@
-## DO NOT EXECUTE THIS CODE, IT WAS IMPLEMENTED TO PREPROCESS THE IMAGE DATA ##
 # Import useful libraries
 import os
 import shutil

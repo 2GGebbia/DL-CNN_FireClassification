@@ -1,16 +1,22 @@
-from __future__ import division
-import keras
+#from __future__ import division
+
 import tensorflow as tf
 print( 'Using Keras version', keras.__version__)
 from keras.preprocessing.image import ImageDataGenerator
+import getpass
+
+dataset_dir = '/home/nct01/{}/.keras/datasets/dataset'.format(getpass.getuser())
 train_datagen = ImageDataGenerator(
+        rotation_range=20,
         rescale=1./255,
         shear_range=0.2,
         zoom_range=0.2,
+        width_shift_range=0.2,
+        height_shift_range=0.2,
         horizontal_flip=True)
 
 train_generator = train_datagen.flow_from_directory(
-        directory = 'dataset/train',
+        directory = dataset_dir + '/train',
         target_size=(250, 250),
         color_mode='rgb',
         shuffle='True',
@@ -18,7 +24,7 @@ train_generator = train_datagen.flow_from_directory(
         class_mode='categorical')
 
 valid_generator = train_datagen.flow_from_directory(
-        directory='dataset/valid',
+        directory=dataset_dir + '/valid',
         target_size=(250, 250),
         color_mode='rgb',
         shuffle='True',
@@ -65,52 +71,52 @@ model.fit_generator(
         verbose=1)
 
 
-# ##Store Plots
-# import matplotlib
-# matplotlib.use('Agg')
-# import matplotlib.pyplot as plt
-# #Accuracy plot
-# plt.plot(history.history['acc'])
-# plt.plot(history.history['val_acc'])
-# plt.title('model accuracy')
-# plt.ylabel('accuracy')
-# plt.xlabel('epoch')
-# plt.legend(['train','val'], loc='upper left')
-# plt.savefig('mnist_fnn_accuracy.pdf')
-# plt.close()
-# #Loss plot
-# plt.plot(history.history['loss'])
-# plt.plot(history.history['val_loss'])
-# plt.title('model loss')
-# plt.ylabel('loss')
-# plt.xlabel('epoch')
-# plt.legend(['train','val'], loc='upper left')
-# plt.savefig('mnist_fnn_loss.pdf')
+# # ##Store Plots
+# # import matplotlib
+# # matplotlib.use('Agg')
+# # import matplotlib.pyplot as plt
+# # #Accuracy plot
+# # plt.plot(history.history['acc'])
+# # plt.plot(history.history['val_acc'])
+# # plt.title('model accuracy')
+# # plt.ylabel('accuracy')
+# # plt.xlabel('epoch')
+# # plt.legend(['train','val'], loc='upper left')
+# # plt.savefig('mnist_fnn_accuracy.pdf')
+# # plt.close()
+# # #Loss plot
+# # plt.plot(history.history['loss'])
+# # plt.plot(history.history['val_loss'])
+# # plt.title('model loss')
+# # plt.ylabel('loss')
+# # plt.xlabel('epoch')
+# # plt.legend(['train','val'], loc='upper left')
+# # plt.savefig('mnist_fnn_loss.pdf')
 
-# #Confusion Matrix
-# from sklearn.metrics import classification_report,confusion_matrix
-# import numpy as np
-# #Compute probabilities
-# Y_pred = model.predict(x_test)
-# #Assign most probable label
-# y_pred = np.argmax(Y_pred, axis=1)
-# #Plot statistics
-# print( 'Analysis of results' )
-# target_names = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-# print(classification_report(np.argmax(y_test,axis=1), y_pred,target_names=target_names))
-# print(confusion_matrix(np.argmax(y_test,axis=1), y_pred))
+# # #Confusion Matrix
+# # from sklearn.metrics import classification_report,confusion_matrix
+# # import numpy as np
+# # #Compute probabilities
+# # Y_pred = model.predict(x_test)
+# # #Assign most probable label
+# # y_pred = np.argmax(Y_pred, axis=1)
+# # #Plot statistics
+# # print( 'Analysis of results' )
+# # target_names = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+# # print(classification_report(np.argmax(y_test,axis=1), y_pred,target_names=target_names))
+# # print(confusion_matrix(np.argmax(y_test,axis=1), y_pred))
 
-# #Saving model and weights
-# from keras.models import model_from_json
-# model_json = model.to_json()
-# with open('model.json', 'w') as json_file:
-#         json_file.write(model_json)
-# weights_file = "weights-MNIST_"+str(score[1])+".hdf5"
-# model.save_weights(weights_file,overwrite=True)
+# # #Saving model and weights
+# # from keras.models import model_from_json
+# # model_json = model.to_json()
+# # with open('model.json', 'w') as json_file:
+# #         json_file.write(model_json)
+# # weights_file = "weights-MNIST_"+str(score[1])+".hdf5"
+# # model.save_weights(weights_file,overwrite=True)
 
-# #Loading model and weights
-# #json_file = open('model.json','r')
-# #model_json = json_file.read()
-# #json_file.close()
-# #model = model_from_json(model_json)
-# #model.load_weights(weights_file)
+# # #Loading model and weights
+# # #json_file = open('model.json','r')
+# # #model_json = json_file.read()
+# # #json_file.close()
+# # #model = model_from_json(model_json)
+# # #model.load_weights(weights_file)
