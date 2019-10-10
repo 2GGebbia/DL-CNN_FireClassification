@@ -57,9 +57,10 @@ kwargs = {
             "activation": 'tanh'
             # "kernel_regularizer":l2
         },
-    "dropout": 0.5
+    "dropout": 0.5,
+    "pool_size": (3,3)
 }
-model = first_arch(input_shape=image_shape, normalization=False,**kwargs)
+model = first_arch(input_shape=image_shape, normalization=False, **kwargs)
 # # #Define the NN architecture
 # from keras.models import Sequential
 # from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Flatten, BatchNormalization, Dropout

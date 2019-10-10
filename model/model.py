@@ -8,18 +8,17 @@ def first_arch(input_shape, normalization=True, **kwargs):
     first_layer_dict = kwargs['first_layer']
     model = Sequential()
     model.add(Conv2D(**first_layer_dict, input_shape=input_shape))
-    model.add(MaxPooling2D(pool_size=(3,3)))
-    if normalization: model.add(BatchNormalization())  
-
+    if normalization: model.add(BatchNormalization())
+    model.add(MaxPooling2D(pool_size=kwargs["pool_size"]))
 
     second_layer_dict = kwargs['second_layer']
     model.add(Conv2D(**second_layer_dict))
-    model.add(MaxPooling2D(pool_size=(3,3)))
     if normalization: model.add(BatchNormalization())
+    model.add(MaxPooling2D(pool_size=kwargs["pool_size"]))
 
     dense_layer_dict = kwargs['dense_layer']
     model.add(Dense(**dense_layer_dict))
-    model.add(Dropout(0.5))
+    model.add(Dropout(kwargs["dropout"]))
 
     model.add(Flatten())
     model.add(Dense(2, activation=('softmax')))
