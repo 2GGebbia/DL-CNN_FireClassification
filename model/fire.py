@@ -9,6 +9,15 @@ from keras.callbacks import TensorBoard
 from model import first_arch 
 import getpass
 
+import os
+import shutil
+import argparse
+
+parser = argparse.ArgumentParser(description='Fire CNN model')
+parser.add_argument('--save_dir', type=str, help='directory to save results')
+args = parser.parse_args()
+save_dir = args.save_dir
+
 dataset_dir = '/home/nct01/{}/.keras/datasets/dataset'.format(getpass.getuser())
 train_datagen = ImageDataGenerator(
         rotation_range=20,
@@ -98,7 +107,7 @@ plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train','valid'], loc='upper left')
-plt.savefig('acc_fire.pdf')
+plt.savefig(save_dir + '/acc_fire.pdf')
 plt.close()
 
 #Loss plot
@@ -108,7 +117,7 @@ plt.title('model loss')
 plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train','val'], loc='upper left')
-plt.savefig("loss_fire.pdf")
+plt.savefig(save_dir + "/loss_fire.pdf")
 
 # Confusion Matrix
 # from sklearn.metrics import classification_report,confusion_matrix
@@ -126,10 +135,10 @@ plt.savefig("loss_fire.pdf")
 #Saving model and weights
 from keras.models import model_from_json
 model_json = model.to_json()
-with open('model.json', 'w') as json_file:
+with open(save_dir + '/model.json', 'w') as json_file:
         json_file.write(model_json)
 weights_file = "weights-fire_"+str(score[1])+".hdf5"
-model.save_weights(weights_file,overwrite=True)
+model.save_weights(save_dir + weights_file,overwrite=True)
 
 #Loading model and weights
 #json_file = open('model.json','r')
