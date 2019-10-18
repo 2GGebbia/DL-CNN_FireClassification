@@ -5,20 +5,15 @@ print( 'Using Keras version', keras.__version__)
 from keras.preprocessing.image import ImageDataGenerator
 from keras.regularizers import l1, l1_l2, l2
 from keras.callbacks import TensorBoard
-
-from model import first_arch 
+from new_model import first_arch
 import getpass
 
 import os
-import shutil
-import argparse
 
-parser = argparse.ArgumentParser(description='Fire CNN model')
-parser.add_argument('--save_dir', type=str, help='directory to save results')
-args = parser.parse_args()
-save_dir = args.save_dir
 
+# job_id = os.environ['SLURM_JOB_ID']
 dataset_dir = '/home/nct01/{}/.keras/datasets/dataset'.format(getpass.getuser())
+# dataset_dir = 'dataset'
 train_datagen = ImageDataGenerator(
         rotation_range=20,
         rescale=1./255,
@@ -28,6 +23,8 @@ train_datagen = ImageDataGenerator(
         height_shift_range=0.2,
         horizontal_flip=True)
 
+valid_datagen = ImageDataGenerator(rescale=1./255)
+
 train_generator = train_datagen.flow_from_directory(
         directory = dataset_dir + '/train',
         target_size=(250, 250),
@@ -36,7 +33,7 @@ train_generator = train_datagen.flow_from_directory(
         batch_size=32,
         class_mode='categorical')
 
-valid_generator = train_datagen.flow_from_directory(
+valid_generator = valid_datagen.flow_from_directory(
         directory=dataset_dir + '/valid',
         target_size=(250, 250),
         color_mode='rgb',
@@ -45,42 +42,21 @@ valid_generator = train_datagen.flow_from_directory(
         class_mode='categorical')
 
 image_shape = train_generator.image_shape
-
-kwargs = {
-    "first_layer":
-        {
-            "filters": 128,
-            "kernel_size": (3,3),
-            "activation": 'relu',
-            "kernel_regularizer": l2(0.)
-        },
-    "second_layer":
-        {
-            "filters": 256,
-            "kernel_size": (3,3),
-            "activation": 'relu',
-            "kernel_regularizer": l2(0.)
-        },
-    "dense_layer":
-        {
-            "units": 2048,
-            "activation": 'tanh'
-            # "kernel_regularizer":l2
-        },
-    "dropout": 0.1,
-    "pool_size": (2,2)
+print(image_shape)
+params_dict = {
+    "learning_rate": [10^-4, 10^-5, 10^-6],
+    "dropout": [0.1, 0.3, 0.5, 0.7],
+    "batch_size": [16, 32, 64],
+    "activation": ['relu', 'elu'],
+    "k_r": [l1(0.), l2(0.)]
 }
 
-model = first_arch(input_shape=image_shape, normalization=False,**kwargs)
-
-# from keras.utils import plot_model
-#     plot_model(model, to_file='model.json', show_shapes=True)
+model = first_arch(input_shape=image_shape, normalization=False)
 
 #Callbacks
 tbCallBack = keras.callbacks.TensorBoard(log_dir='../logs', histogram_freq=0, write_graph=True, write_images=True)
 
 # #Compile the NN
-model.compile(optimizer='sgd',loss='categorical_crossentropy',metrics=['accuracy'])
 
 STEP_SIZE_TRAIN=train_generator.n//train_generator.batch_size
 STEP_SIZE_VALID=valid_generator.n//valid_generator.batch_size
@@ -88,7 +64,7 @@ STEP_SIZE_VALID=valid_generator.n//valid_generator.batch_size
 history = model.fit_generator(
         train_generator,
         steps_per_epoch=STEP_SIZE_TRAIN,
-        epochs=50,
+        epochs=5,
         validation_data=valid_generator,
         validation_steps=STEP_SIZE_VALID,
         verbose=1,
@@ -107,7 +83,7 @@ plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train','valid'], loc='upper left')
-plt.savefig(save_dir + '/acc_fire.pdf')
+plt.savefig('../results/acc_fire_{}.pdf'.format(job_id))
 plt.close()
 
 #Loss plot
@@ -117,7 +93,7 @@ plt.title('model loss')
 plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train','val'], loc='upper left')
-plt.savefig(save_dir + "/loss_fire.pdf")
+plt.savefig("../results/loss_fire_{}.pdf".format(job_id))
 
 # Confusion Matrix
 # from sklearn.metrics import classification_report,confusion_matrix
@@ -135,10 +111,10 @@ plt.savefig(save_dir + "/loss_fire.pdf")
 #Saving model and weights
 from keras.models import model_from_json
 model_json = model.to_json()
-with open(save_dir + '/model.json', 'w') as json_file:
+with open( '../results/model_{}.json'.format(job_id), 'w') as json_file:
         json_file.write(model_json)
 weights_file = "weights-fire_"+str(score[1])+".hdf5"
-model.save_weights(save_dir + weights_file,overwrite=True)
+model.save_weights('../results/{}_{}'.format(job_id, weights_file) ,overwrite=True)
 
 #Loading model and weights
 #json_file = open('model.json','r')
