@@ -5,6 +5,7 @@ from keras.optimizers import Adam
 from keras.regularizers import l1, l1_l2, l2
 
 # It consists of 2 conv layers, 1 Dense, 1 optional Dropout, Flatten + Output layer=Dense
+<<<<<<< HEAD
 def first_arch(normalization=True, input_shape=(250,250,3), activation='relu', batch_size=32, dropout=0.4, learning_rate=0.0001, k_r=l2(0.)):
 
     model = Sequential()
@@ -13,6 +14,16 @@ def first_arch(normalization=True, input_shape=(250,250,3), activation='relu', b
     model.add(MaxPooling2D(pool_size=(2,2)))
 
     model.add(Conv2D(256, (5,5), activation=activation, kernel_regularizer=k_r))
+=======
+def first_arch(normalization=True, input_shape=(250,250,3), activation='relu', batch_size=32, dropout=0.1, learning_rate=10^-4, k_r=l2(0.)):
+
+    model = Sequential()
+    model.add(Conv2D(128, (3,3), activation=activation, kernel_regularizer=k_r, input_shape=input_shape))
+    if normalization: model.add(BatchNormalization())
+    model.add(MaxPooling2D(pool_size=(2,2)))
+
+    model.add(Conv2D(256, (3,3), activation=activation, kernel_regularizer=k_r))
+>>>>>>> 1a29ba72b35c31affb49678f87fb38ffdad98ed1
     if normalization: model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=(2,2)))
 

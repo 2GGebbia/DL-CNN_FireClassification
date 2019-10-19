@@ -11,7 +11,11 @@ import getpass
 import os
 
 
+<<<<<<< HEAD
 job_id = os.environ['SLURM_JOB_ID']
+=======
+# job_id = os.environ['SLURM_JOB_ID']
+>>>>>>> 1a29ba72b35c31affb49678f87fb38ffdad98ed1
 dataset_dir = '/home/nct01/{}/.keras/datasets/dataset'.format(getpass.getuser())
 # dataset_dir = 'dataset'
 train_datagen = ImageDataGenerator(
@@ -42,9 +46,17 @@ valid_generator = valid_datagen.flow_from_directory(
         class_mode='categorical')
 
 image_shape = train_generator.image_shape
+<<<<<<< HEAD
 params_dict = {
     "learning_rate": [10^-2, 10^-3, 10^-4, 10^-5, 10^-6],
     "dropout": [i/10 for i in range(1,9)],
+=======
+print(image_shape)
+params_dict = {
+    "learning_rate": [10^-4, 10^-5, 10^-6],
+    "dropout": [0.1, 0.3, 0.5, 0.7],
+    "batch_size": [16, 32, 64],
+>>>>>>> 1a29ba72b35c31affb49678f87fb38ffdad98ed1
     "activation": ['relu', 'elu'],
     "k_r": [l1(0.), l2(0.)]
 }
@@ -62,7 +74,11 @@ STEP_SIZE_VALID=valid_generator.n//valid_generator.batch_size
 history = model.fit_generator(
         train_generator,
         steps_per_epoch=STEP_SIZE_TRAIN,
+<<<<<<< HEAD
         epochs=30,
+=======
+        epochs=5,
+>>>>>>> 1a29ba72b35c31affb49678f87fb38ffdad98ed1
         validation_data=valid_generator,
         validation_steps=STEP_SIZE_VALID,
         verbose=1,
@@ -81,7 +97,11 @@ plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train','valid'], loc='upper left')
+<<<<<<< HEAD
 plt.savefig('results/acc_fire_{}.pdf'.format(job_id))
+=======
+plt.savefig('../results/acc_fire_{}.pdf'.format(job_id))
+>>>>>>> 1a29ba72b35c31affb49678f87fb38ffdad98ed1
 plt.close()
 
 #Loss plot
@@ -91,7 +111,11 @@ plt.title('model loss')
 plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train','val'], loc='upper left')
+<<<<<<< HEAD
 plt.savefig("results/loss_fire_{}.pdf".format(job_id))
+=======
+plt.savefig("../results/loss_fire_{}.pdf".format(job_id))
+>>>>>>> 1a29ba72b35c31affb49678f87fb38ffdad98ed1
 
 # Confusion Matrix
 # from sklearn.metrics import classification_report,confusion_matrix
@@ -109,10 +133,17 @@ plt.savefig("results/loss_fire_{}.pdf".format(job_id))
 #Saving model and weights
 from keras.models import model_from_json
 model_json = model.to_json()
+<<<<<<< HEAD
 with open( 'results/model_{}.json'.format(job_id), 'w') as json_file:
         json_file.write(model_json)
 weights_file = "weights-fire_"+str(score[1])+".hdf5"
 model.save_weights('results/{}_{}'.format(job_id, weights_file) ,overwrite=True)
+=======
+with open( '../results/model_{}.json'.format(job_id), 'w') as json_file:
+        json_file.write(model_json)
+weights_file = "weights-fire_"+str(score[1])+".hdf5"
+model.save_weights('../results/{}_{}'.format(job_id, weights_file) ,overwrite=True)
+>>>>>>> 1a29ba72b35c31affb49678f87fb38ffdad98ed1
 
 #Loading model and weights
 #json_file = open('model.json','r')
