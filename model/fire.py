@@ -4,35 +4,24 @@ import tensorflow as tf
 print( 'Using Keras version', keras.__version__)
 from keras.preprocessing.image import ImageDataGenerator
 from keras.regularizers import l1, l1_l2, l2
-from keras.callbacks import TensorBoard
-from new_model import create_model
+
+from model import first_arch
 import getpass
-import os
+from random import uniform
 
-import matplotlib
-# Store Plots
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-
-from keras.models import model_from_json
-
-# SLURM JOB ID 
-job_id = os.environ['SLURM_JOB_ID']
-
-# DATASET DIRECTORY
 dataset_dir = '/home/nct01/{}/.keras/datasets/dataset'.format(getpass.getuser())
-
-# Data Image Generators for Train and Validation
 train_datagen = ImageDataGenerator(
-        rotation_range=20,
         rescale=1./255,
+        rotation_range=20,
         shear_range=0.2,
         zoom_range=0.2,
         width_shift_range=0.2,
         height_shift_range=0.2,
-        horizontal_flip=True)
+        horizontal_flip=True
+)
 
-valid_datagen = ImageDataGenerator(rescale=1./255)
+valid_datagen = ImageDataGenerator(
+        rescale=1./255)
 
 train_generator = train_datagen.flow_from_directory(
         directory = dataset_dir + '/train',
@@ -52,12 +41,36 @@ valid_generator = valid_datagen.flow_from_directory(
 
 image_shape = train_generator.image_shape
 
-## MANUALLY GRID SEARCH 
+kwargs = {
+        "first_layer_conv":
+        {
+                "filters": 128,
+                "kernel_size": (5,5),
+                "activation": 'relu',
+                "kernel_regularizer": l2(0.)
+        },
+        "second_layer_conv":
+        {
+                "filters": 256,
+                "kernel_size": (5,5),
+                "activation": 'relu',
+                "kernel_regularizer": l2(0.)
+        },
+        "dense_layer":
+        {
+                "units": 2048,
+                "activation": 'tanh',
+                "kernel_regularizer": l2(0.)
+        },
+        "dropout": 0,
+        "pool_size": (2,2)
+}
 
-STEP_SIZE_TRAIN=train_generator.n//train_generator.batch_size
-STEP_SIZE_VALID=valid_generator.n//valid_generator.batch_size
-for learning_rate in [10**-2, 10**-3, 10**-4, 10**-5]:
-        for dropout in [i/10 for i in range(1,8)]:
+# for dropout in [i/10 for i in range(3,8)]:
+#         for learning_rate in [10**-2, 10**-3, 10**-4]:
+
+for dropout in [0.5, 0.3, 0.4, 0.6]:
+        for learning_rate in [0.001, 0.0001, 0.00001]:
 
                 print("\n\n\n")
                 print(15*"=")
@@ -66,48 +79,65 @@ for learning_rate in [10**-2, 10**-3, 10**-4, 10**-5]:
                 print(15*"=")
                 print(15*"=")
                 print("\n\n\n")
+                
+                kwargs["dropout"] = dropout
 
-                model = create_model(dropout, learning_rate)
+                model = first_arch(input_shape=image_shape, normalization=False,**kwargs)
 
-                # Start training
+
+                ##Compile the NN
+                sgd = keras.optimizers.SGD(lr=learning_rate, decay=1e-6, momentum=0.9, nesterov=True)
+                model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
+
+                STEP_SIZE_TRAIN=train_generator.n//train_generator.batch_size
+                STEP_SIZE_VALID=valid_generator.n//valid_generator.batch_size
+                # #Start training
                 history = model.fit_generator(
                         train_generator,
                         steps_per_epoch=STEP_SIZE_TRAIN,
-                        epochs=20,
+                        epochs=15,
                         validation_data=valid_generator,
                         validation_steps=STEP_SIZE_VALID,
                         verbose=1)
 
+                ##Store Plots
+                import matplotlib
+                matplotlib.use('Agg')
+                import matplotlib.pyplot as plt
 
-
-                # Accuracy plot
+                #Accuracy plot
                 plt.plot(history.history['acc'])
                 plt.plot(history.history['val_acc'])
                 plt.title('model accuracy')
                 plt.ylabel('accuracy')
                 plt.xlabel('epoch')
                 plt.legend(['train','valid'], loc='upper left')
-                plt.savefig('results/acc_fire_drop_{}_lr_{}_job_{}.pdf'.format(dropout, learning_rate, job_id))
+                plt.savefig('acc_fire_dr{}lr_{}.pdf'.format(dropout, learning_rate))
                 plt.close()
 
-                # Loss plot
+                #Loss plot
                 plt.plot(history.history['loss'])
                 plt.plot(history.history['val_loss'])
                 plt.title('model loss')
                 plt.ylabel('loss')
                 plt.xlabel('epoch')
-                plt.legend(['train','valid'], loc='upper left')
-                plt.savefig('results/loss_fire_drop_{}_lr_{}_job_{}.pdf'.format(dropout, learning_rate, job_id))
+                plt.legend(['train','val'], loc='upper left')
+                plt.savefig("loss_fire_dr{}lr_{}.pdf".format(dropout, learning_rate))
+                plt.close()
 
-                # Saving model and weights
-                model_json = model.to_json()
-                with open('results/model_drop_{}_lr_{}_job_{}.pdf'.format(dropout, learning_rate, job_id), 'w') as json_file:
-                        json_file.write(model_json)
-                # model.save_weights('results/weights_drop_{}_lr_{}_job_{}.hdf5'.format(dropout, learning_rate, job_id) ,overwrite=True)
+                
+                #Saving model and weights
+                from keras.models import model_from_json
+                # model_json = model.to_json()
+                # with open('model.json', 'w') as json_file:
+                #         json_file.write(model_json)
+                # weights_file = "weights-fire.hdf5"
+                # model.save_weights(weights_file,overwrite=True)
 
-#Loading model and weights
-#json_file = open('model.json','r')
-#model_json = json_file.read()
-#json_file.close()
-#model = model_from_json(model_json)
-#model.load_weights(weights_file)
+                #Loading model and weights
+                #json_file = open('model.json','r')
+                #model_json = json_file.read()
+                #json_file.close()
+                #model = model_from_json(model_json)
+                #model.load_weights(weights_file)
+
