@@ -4,6 +4,7 @@ import tensorflow as tf
 print( 'Using Keras version', keras.__version__)
 from keras.preprocessing.image import ImageDataGenerator
 from keras.regularizers import l1, l1_l2, l2
+from keras.callbacks import EarlyStopping
 
 from model import first_arch
 import getpass
@@ -66,10 +67,7 @@ kwargs = {
         "pool_size": (2,2)
 }
 
-# for dropout in [i/10 for i in range(3,8)]:
-#         for learning_rate in [10**-2, 10**-3, 10**-4]:
-
-for dropout in [0.5, 0.3, 0.4, 0.6]:
+for dropout in [0.3, 0.4, 0.5, 0.6]:
         for learning_rate in [0.001, 0.0001, 0.00001]:
 
                 print("\n\n\n")
@@ -84,28 +82,33 @@ for dropout in [0.5, 0.3, 0.4, 0.6]:
 
                 model = first_arch(input_shape=image_shape, normalization=False,**kwargs)
 
-
-                ##Compile the NN
+                # Compile the NN
                 sgd = keras.optimizers.SGD(lr=learning_rate, decay=1e-6, momentum=0.9, nesterov=True)
                 model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
 
+
+                # Callbacks
+                es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=15)
+
+
                 STEP_SIZE_TRAIN=train_generator.n//train_generator.batch_size
                 STEP_SIZE_VALID=valid_generator.n//valid_generator.batch_size
-                # #Start training
+                # Start training
                 history = model.fit_generator(
                         train_generator,
                         steps_per_epoch=STEP_SIZE_TRAIN,
                         epochs=15,
                         validation_data=valid_generator,
                         validation_steps=STEP_SIZE_VALID,
-                        verbose=1)
+                        verbose=1,
+                        callbacks=[eg])
 
-                ##Store Plots
+                # Store Plots
                 import matplotlib
                 matplotlib.use('Agg')
                 import matplotlib.pyplot as plt
 
-                #Accuracy plot
+                # Accuracy plot
                 plt.plot(history.history['acc'])
                 plt.plot(history.history['val_acc'])
                 plt.title('model accuracy')
@@ -115,7 +118,7 @@ for dropout in [0.5, 0.3, 0.4, 0.6]:
                 plt.savefig('acc_fire_dr{}lr_{}.pdf'.format(dropout, learning_rate))
                 plt.close()
 
-                #Loss plot
+                # Loss plot
                 plt.plot(history.history['loss'])
                 plt.plot(history.history['val_loss'])
                 plt.title('model loss')
@@ -126,18 +129,10 @@ for dropout in [0.5, 0.3, 0.4, 0.6]:
                 plt.close()
 
                 
-                #Saving model and weights
+                Saving model and weights
                 from keras.models import model_from_json
-                # model_json = model.to_json()
-                # with open('model.json', 'w') as json_file:
-                #         json_file.write(model_json)
-                # weights_file = "weights-fire.hdf5"
-                # model.save_weights(weights_file,overwrite=True)
-
-                #Loading model and weights
-                #json_file = open('model.json','r')
-                #model_json = json_file.read()
-                #json_file.close()
-                #model = model_from_json(model_json)
-                #model.load_weights(weights_file)
-
+                model_json = model.to_json()
+                with open('model.json', 'w') as json_file:
+                        json_file.write(model_json)
+                weights_file = "weights-fire.hdf5"
+                model.save_weights(weights_file,overwrite=True)
