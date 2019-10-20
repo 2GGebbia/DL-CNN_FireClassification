@@ -42,9 +42,9 @@ valid_generator = valid_datagen.flow_from_directory(
 
 image_shape = train_generator.image_shape
 
-for i in range(15):
-    dropout = uniform(0.1, 0.8)
-    lr = 10**uniform(-2, -6)
+for i in range(1):
+    dropout = 0.75  # uniform(0.4, 0.8)
+    lr = 0.00003  # 10**uniform(-4, -5.5)
 
     kwargs = {
         "first_layer_conv":
@@ -95,7 +95,7 @@ for i in range(15):
     history = model.fit_generator(
             train_generator,
             steps_per_epoch=STEP_SIZE_TRAIN,
-            epochs=15,
+            epochs=150,
             validation_data=valid_generator,
             validation_steps=STEP_SIZE_VALID,
             verbose=1,
@@ -142,11 +142,11 @@ for i in range(15):
 
     #Saving model and weights
     from keras.models import model_from_json
-    # model_json = model.to_json()
-    # with open('model.json', 'w') as json_file:
-    #         json_file.write(model_json)
-    # weights_file = "weights-fire.hdf5"
-    # model.save_weights(weights_file,overwrite=True)
+    model_json = model.to_json()
+    with open('model.json', 'w') as json_file:
+            json_file.write(model_json)
+    weights_file = "weights-fire.hdf5"
+    model.save_weights(weights_file,overwrite=True)
 
     #Loading model and weights
     #json_file = open('model.json','r')

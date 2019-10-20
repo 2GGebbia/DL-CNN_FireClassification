@@ -45,7 +45,7 @@ def second_arch(input_shape, normalization=True, **kwargs):
     model.add(Dense(**first_layer_dense_dict))
     model.add(Dropout(kwargs["dropout"]))
 
-    second_layer_dense_dict = kwargs['first_layer_dense']
+    second_layer_dense_dict = kwargs['second_layer_dense']
     model.add(Dense(**second_layer_dense_dict))
     model.add(Dropout(kwargs["dropout"]))
 
