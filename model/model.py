@@ -6,13 +6,14 @@ from keras.layers import Dense, Activation, Conv2D, MaxPooling2D, Flatten, Batch
 # It consists of 2 conv layers, 1 Dense, 1 optional Dropout, Flatten + Output layer=Dense
 def first_arch(input_shape, normalization=True, **kwargs):
 
-    first_layer_dict = kwargs['first_layer']
     model = Sequential()
+    
+    first_layer_dict = kwargs['first_layer_conv']
     model.add(Conv2D(**first_layer_dict, input_shape=input_shape))
     if normalization: model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=kwargs["pool_size"]))
 
-    second_layer_dict = kwargs['second_layer']
+    second_layer_dict = kwargs['second_layer_conv']
     model.add(Conv2D(**second_layer_dict))
     if normalization: model.add(BatchNormalization())
     model.add(MaxPooling2D(pool_size=kwargs["pool_size"]))
